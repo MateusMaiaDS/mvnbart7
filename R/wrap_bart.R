@@ -77,7 +77,7 @@ mvnbart <- function(x_train,
              }
      }
      # Verifying if it's been using a y_mat matrix
-     if(is.matrix(y_mat)){
+     if(!is.matrix(y_mat)){
          stop("Insert a valid matrix for the response.")
      }
 
