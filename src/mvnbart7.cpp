@@ -1669,7 +1669,7 @@ Rcpp::List cppbart_uni(arma::mat x_train,
         arma::cube Sigma_post(data.Sigma.n_rows,data.Sigma.n_cols,n_post,arma::fill::zeros);
         arma::cube all_Sigma_post(data.Sigma.n_rows,data.Sigma.n_cols,n_mcmc,arma::fill::zeros);
 
-        Rcpp::Rcout << "error here2" << endl;
+        // Rcpp::Rcout << "error here2" << endl;
 
         // =====================================
         // For the moment I will not store those
