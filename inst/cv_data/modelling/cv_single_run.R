@@ -7,7 +7,7 @@ n_ <- 250
 p_ <- 10
 n_tree_ <- 50
 mvn_dim_ <- 2
-task_ <- "classification" # For this it can be either 'classification' or 'regression'
+task_ <- "regression" # For this it can be either 'classification' or 'regression'
 sim_ <- "friedman1" # For this can be either 'friedman1' or 'friedman2'
 
 
@@ -56,6 +56,9 @@ Sigma_ <- cv_element_$train$Sigma
 # Doing the same for the MVN-BART
 # nmcmc <- 10000
 y_train <- y_train[,1, drop = FALSE]
+x_train <- x_train[,1,drop = FALSE]
+x_test <- x_test[,1,drop = FALSE]
+
 mvbart_mod <- mvnbart(x_train = x_train,y_mat = y_train[,1,drop = FALSE],x_test = x_test,
                       n_tree = 50,n_mcmc = 2000,n_burn = 500,df = 2,
                       m = nrow(x_train))

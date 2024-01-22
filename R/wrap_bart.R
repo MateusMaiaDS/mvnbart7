@@ -62,8 +62,16 @@ mvnbart <- function(x_train,
      conditional_bool <- TRUE # Again is always true
      tn_sampler <- FALSE # Define if the truncated-normal sampler gonna be used or not
 
+
+     # Checking if the variables are correct
      if(!is.null(specify_variables) & (length(specify_variables)!=NCOL(y_mat))){
              stop("Specify a proper list for the variables to be used in the tree.")
+     }
+
+     # Checking for the case with varimportance=TRUE and only 1 variable available
+     if(varimportance & (NCOL(x_train)==1)){
+             varimportance <- FALSE
+             warning("varimportance is settled as FALSE as only as only one predictor is available.")
      }
 
      if(is.null(specify_variables)){
@@ -388,7 +396,7 @@ mvnbart <- function(x_train,
                      var_importance <- array(NA,dim = c(n_mcmc,ncol(x_test_scale),ncol(y_mat)))
                      for(ii in 1:n_mcmc){
                              for(jj in 1:ncol(y_mat)){
-                                     var_importance[ii,,jj] <- apply(bart_obj[[8]][ii][[1]][,,jj],2,sum)
+                                     var_importance[ii,,jj] <- apply(bart_obj[[8]][ii][[1]][,,jj, drop = FALSE],2,sum)
                              }
                      }
 
@@ -417,6 +425,7 @@ mvnbart <- function(x_train,
 
              } else {
                      ESS_val <- NULL
+                     ESS_warn <- FALSE
              }
 
              if(ESS_warn){
@@ -457,7 +466,7 @@ mvnbart <- function(x_train,
                      var_importance <- array(NA,dim = c(n_mcmc,ncol(x_test_scale),ncol(y_mat)))
                      for(ii in 1:n_mcmc){
                              for(jj in 1:ncol(y_mat)){
-                                var_importance[ii,,jj] <- apply(bart_obj[[7]][ii][[1]][,,jj],2,sum)
+                                var_importance[ii,,jj] <- apply(bart_obj[[7]][ii][[1]][,,jj, drop = FALSE],2,sum)
                              }
                      }
 
@@ -487,6 +496,7 @@ mvnbart <- function(x_train,
 
              } else {
                      ESS_val <- NULL
+                     ESS_warn <- FALSE
              }
 
              if(ESS_warn){

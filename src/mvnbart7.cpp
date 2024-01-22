@@ -1745,7 +1745,6 @@ Rcpp::List cppbart_uni(arma::mat x_train,
 
                         double Sigma_j_j = data.Sigma(j,j);
 
-                        int aux_j_counter = 0;
 
                         // Setting the covariance setting;
                         data.v_j = Sigma_j_j;

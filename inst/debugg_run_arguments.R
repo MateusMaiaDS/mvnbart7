@@ -30,7 +30,9 @@ varimportance <- TRUE
 #                           c(1,4))
 specify_variables <- NULL
 y_mat <- y_train
-diagnostics <- FALSE
+diagnostic <- FALSE
+m <- 200
+
 # x_train <- df_x
 # y_mat <- df_y
 # x_test <- df_x_new
