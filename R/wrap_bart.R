@@ -109,9 +109,23 @@ mvnbart <- function(x_train,
              stop("Classificaton model should not scale y.")
      }
 
+     # Checking if the train and the test have the same columns
+     if(NCOL(x_train)!=NCOL(x_test)){
+             stop("The x_train and x_test do not match columns.")
+     }
+
      # Verifying if x_train and x_test are matrices
      if(!is.data.frame(x_train) || !is.data.frame(x_test)){
-          stop("Insert valid data.frame for both data and xnew.")
+
+
+          if(!is.matrix(x_train) || !is.matrix(x_test)){
+                  stop("Insert valid data.frame for both data and xnew.")
+          } else {
+                  warning("The x_train and x_test were converted to the data.frame type.")
+                  x_train <- as.data.frame(x_train)
+                  x_test <- as.data.frame(x_test)
+                  colnames(x_train) <- colnames(x_test) <- paste0("x.1",1:NCOL(x_train))
+          }
      }
 
 
