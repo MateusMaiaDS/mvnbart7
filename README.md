@@ -1,4 +1,4 @@
-# mvnbart6
+# mvnbart7
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -10,7 +10,7 @@ You can install the development version of mvnbart6 from [GitHub](https://github
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("MateusMaiaDS/mvnbart6")
+devtools::install_github("MateusMaiaDS/mvnbart7")
 ```
 
 
