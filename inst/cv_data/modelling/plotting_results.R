@@ -7,7 +7,7 @@ n_ <- 1000
 p_ <- 10
 n_tree_ <- 50
 mvn_dim_ <- 3
-task_ <- "classification" # For this it can be either 'classification' or 'regression'
+task_ <- "regression" # For this it can be either 'classification' or 'regression'
 sim_ <- "friedman1" # For this can be either 'friedman1' or 'friedman2'
 
 result <- readRDS(paste0("inst/cv_data/",task_,"/result/",
@@ -28,39 +28,102 @@ result_df_corr_STAN <- lapply(result_STAN,function(x){x$correlation_metrics}) %>
 result_df <- rbind(result_df,result_df_STAN)
 result_df_corr <- rbind(result_df_corr, result_df_corr_STAN)
 
-rmse_plot <- result_df %>% filter(metric == "logloss_test") %>%
+# Changing the factor
+if(task_=="regression"){
+result_df <- result_df %>% mutate(model = factor(model,levels = c("mvBART","BART", "bayesSUR")))
+
+if(mvn_dim_==2) {
+        text_size <- 15
+} else if(mvn_dim_ == 3){
+        text_size <- 20
+}
+rmse_plot <- result_df %>% filter(metric == "rmse_test") %>%
         mutate(mvn_dim = as.factor(mvn_dim)) %>%
         ggplot()+
-        geom_boxplot(mapping = aes(x = model, y = (value)))+
-        ylab("Logloss test")+
+        geom_boxplot(mapping = aes(x = model, y = (value),col = model),show.legend = FALSE)+
+        # scale_y_log10(labels = scales::number_format(accuracy = 0.01))+ # Maybe use the log-scale
+        scale_y_continuous(labels = scales::number_format(accuracy = 0.01))+
+        ylab("RMSE")+
         xlab("")+
         facet_wrap(~mvn_dim,scales = "free_y")+
         theme_classic()+
-        theme(axis.text.x = element_text(angle = 90))
+        theme(axis.text.x = element_blank(),
+              axis.ticks.x = element_blank(),
+              text = element_text(size = text_size))
 
-crps_plot <- result_df %>% filter(metric == "acc_test") %>%
+# Just a decoy to get a legend
+rmse_plot_legend <- result_df %>% filter(metric == "rmse_test") %>%
         mutate(mvn_dim = as.factor(mvn_dim)) %>%
         ggplot()+
-        geom_boxplot(mapping = aes(x = model, y = (value)))+
-        ylab("ACC test")+
+        geom_boxplot(mapping = aes(x = model, y = (value),col = model))+
+        # scale_y_log10(labels = scales::number_format(accuracy = 0.01))+# Maybe use the log-scale
+        scale_y_continuous(labels = scales::number_format(accuracy = 0.01))+
+        ylab("RMSE")+
         xlab("")+
         facet_wrap(~mvn_dim,scales = "free_y")+
         theme_classic()+
-        theme(axis.text.x = element_text(angle = 90))
+        theme(axis.text.x = element_blank(),
+              axis.ticks.x = element_blank(),
+              text = element_text(size = text_size))
 
+rmse_plot_legend <- rmse_plot_legend + labs(color = "Model:")
 
-pi_plot <- result_df %>% filter(metric == "p_cr_test") %>%
+crps_plot <- result_df %>% filter(metric == "crps_test") %>%
         mutate(mvn_dim = as.factor(mvn_dim)) %>%
         ggplot()+
-        geom_boxplot(mapping = aes(x = model, y = value))+
+        geom_boxplot(mapping = aes(x = model, y = (value),col = model),show.legend = FALSE)+
+        # scale_y_log10(labels = scales::number_format(accuracy = 0.01))+# Maybe use the log-scale
+        scale_y_continuous(labels = scales::number_format(accuracy = 0.01))+
+        ylab("CRPS")+
+        xlab("")+
+        facet_wrap(~mvn_dim,scales = "free_y")+
+        theme_classic()+
+        theme(axis.text.x = element_blank(),
+              axis.ticks.x = element_blank(),
+              text = element_text(size = text_size))
+
+
+pi_plot <- result_df %>% filter(metric == "pi_test") %>%
+        mutate(mvn_dim = as.factor(mvn_dim)) %>%
+        ggplot()+
+        geom_boxplot(mapping = aes(x = model, y = value,col = model),show.legend = FALSE)+
+        scale_y_continuous(labels = scales::number_format(accuracy = 0.01))+ #
         geom_hline(yintercept = 0.5, lty = 'dashed', col = 'blue')+
         ylab("PI coverage")+
         xlab("")+
         facet_wrap(~mvn_dim,scales = "free_y")+
         theme_classic()+
-        theme(axis.text.x = element_text(angle = 90))
+        theme(axis.text.x = element_blank(),
+              axis.ticks.x = element_blank(),
+              text = element_text(size = text_size))
 
-cowplot::plot_grid(rmse_plot,crps_plot,pi_plot,ncol = 3)
+legend <- get_legend(rmse_plot_legend + theme(legend.position = "bottom"))
+
+main_plot <-  cowplot::plot_grid(cowplot::plot_grid(rmse_plot,crps_plot,pi_plot,ncol = 3),
+                                 legend,nrow = 2,
+                                 rel_heights = c(1, 0.1))  # Adjust legend width as needed
+
+main_plot
+# Set fixed width and height for the plot
+if(mvn_dim_==2){
+        width_inches <- 12  # Adjust as needed
+        height_inches <- 5  # Adjust as needed
+} else if(mvn_dim_==3){
+        width_inches <- 18  # Adjust as needed
+        height_inches <- 7  # Adjust as needed
+} else {
+        stop("Enter valid mvn_dim")
+}
+
+# Export as TIFF
+# (attention change your path here)
+ggsave(paste0("/Users/mateusmaia/Documents/",sim_,"_",task_,"_",n_,"_",mvn_dim_,".tiff"), plot = main_plot,
+       width = width_inches, height = height_inches, dpi = 300)
+
+# Export as PDF
+ggsave(paste0("/Users/mateusmaia/Documents/",sim_,"_",task_,"_",n_,"_",mvn_dim_,".pdf"), plot = main_plot,
+       width = width_inches, height = height_inches)
+}
 
 # Plotting results for the CR coverage
 result_df_corr %>% filter(metric == "cr_cov") %>%  group_by(param_index,model) %>%
