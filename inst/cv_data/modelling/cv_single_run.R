@@ -3,10 +3,10 @@ rm(list=ls())
 library(doParallel)
 devtools::load_all()
 set.seed(42)
-n_ <- 250
+n_ <- 1000
 p_ <- 10
 n_tree_ <- 50
-mvn_dim_ <- 2
+mvn_dim_ <- 3
 task_ <- "regression" # For this it can be either 'classification' or 'regression'
 sim_ <- "friedman1" # For this can be either 'friedman1' or 'friedman2'
 
@@ -49,23 +49,24 @@ x_test <- cv_element_$test$x
 y_test <- cv_element_$test$y
 y_true_train <- cv_element_$train$y_true
 y_true_test <- cv_element_$test$y_true
+nmcmc <- 5000
 
 # True Sigma element
 Sigma_ <- cv_element_$train$Sigma
 
-# Doing the same for the MVN-BART
-# nmcmc <- 10000
-y_train <- y_train[,1, drop = FALSE]
-x_train <- x_train[,1,drop = FALSE]
-x_test <- x_test[,1,drop = FALSE]
+# # Doing the same for the MVN-BART
+# # nmcmc <- 10000
+# y_train <- y_train[,1, drop = FALSE]
+# x_train <- x_train[,1,drop = FALSE]
+# x_test <- x_test[,1,drop = FALSE]
 
-mvbart_mod <- mvnbart(x_train = x_train,y_mat = y_train[,1,drop = FALSE],x_test = x_test,
-                      n_tree = 50,n_mcmc = 2000,n_burn = 500,df = 2,
+mvbart_mod <- mvnbart(x_train = x_train,y_mat = y_train,x_test = x_test,
+                      n_tree = 50,n_mcmc = nmcmc,n_burn = 0,df = 10,
                       m = nrow(x_train))
 
 
-# saveRDS(mvbart_mod,file = paste0("inst/case_study/rep_",rep_,"_single_run",n_,"_ntree_",n_tree_,"_mvn_",mvn_dim_,
-#                                  "_task_",task_,"_sim_",sim_,"_nmcmc_,",nmcmc,".Rds"))
+saveRDS(mvbart_mod,file = paste0("~/Documents/lab_spBART/mvbart_runs/rep_",rep_,"_single_run",n_,"_ntree_",n_tree_,"_mvn_",mvn_dim_,
+                                 "_task_",task_,"_sim_",sim_,"_nmcmc_,",nmcmc,".Rds"))
 
 par(mfrow=c(1,1))
 sqrt(mvbart_mod$Sigma_post[1,1,]) %>% plot(type = 'l', main = expression(sigma[1]))

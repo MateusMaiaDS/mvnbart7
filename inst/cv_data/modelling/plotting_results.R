@@ -8,7 +8,7 @@ p_ <- 10
 n_tree_ <- 50
 mvn_dim_ <- 3
 task_ <- "regression" # For this it can be either 'classification' or 'regression'
-sim_ <- "friedman1" # For this can be either 'friedman1' or 'friedman2'
+sim_ <- "friedman2" # For this can be either 'friedman1' or 'friedman2'
 
 result <- readRDS(paste0("inst/cv_data/",task_,"/result/",
                          sim_,"_",task_,"_n_",n_,"_p_",p_,"_ntree_",n_tree_,"_mvndim_",mvn_dim_,".Rds"))
@@ -110,7 +110,7 @@ if(mvn_dim_==2){
         height_inches <- 5  # Adjust as needed
 } else if(mvn_dim_==3){
         width_inches <- 18  # Adjust as needed
-        height_inches <- 7  # Adjust as needed
+        height_inches <- 5  # Adjust as needed
 } else {
         stop("Enter valid mvn_dim")
 }
@@ -126,10 +126,16 @@ ggsave(paste0("/Users/mateusmaia/Documents/",sim_,"_",task_,"_",n_,"_",mvn_dim_,
 }
 
 # Plotting results for the CR coverage
-result_df_corr %>% filter(metric == "cr_cov") %>%  group_by(param_index,model) %>%
-        summarise(mean_cv = mean(value)) %>% print(n = 24)
+summary_df_corr_cov <-result_df_corr %>% filter(metric == "cr_cov") %>%  group_by(param_index,model) %>%
+        summarise(mean_cv = mean(value)) %>% pivot_wider(names_from = model, values_from = mean_cv) %>%
+        mutate(metric = "PI coverage")
 
-result_df_corr %>% filter(metric == "rmse") %>%  group_by(param_index,model) %>%
-        summarise(mean_cv = sqrt(mean(value^2))) %>% print(n = 24)
+summary_df_corr_rmse <- result_df_corr %>% filter(metric == "rmse") %>%  group_by(param_index,model) %>%
+        summarise(mean_cv = sqrt(mean(value^2))) %>% print(n = 24 )%>% pivot_wider(names_from = model, values_from = mean_cv) %>%
+        mutate(metric = "RMSE")
 
+summary_corr_comparison <- rbind(summary_df_corr_cov,
+                                 summary_df_corr_rmse) %>%
+        dplyr::filter(stringr::str_detect(param_index,"rho"))
+summary_corr_comparison
 
